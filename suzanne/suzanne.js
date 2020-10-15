@@ -6,19 +6,20 @@ const environ = 'venetian_crossroads_2k'
 const ibl_url = `${environ}/${environ}_ibl.ktx`;
 const sky_small_url = `${environ}/${environ}_skybox_tiny.ktx`;
 const sky_large_url = `${environ}/${environ}_skybox.ktx`;
-const albedo_url = `chim${albedo_suffix}.ktx`;
+const albedo_url = `albedo${albedo_suffix}.ktx`;
 const ao_url = `ao${texture_suffix}.ktx`;
 const metallic_url = `metallic${texture_suffix}.ktx`;
 const normal_url = `normal${texture_suffix}.ktx`;
 const roughness_url = `roughness${texture_suffix}.ktx`;
 const filamat_url = 'textured.filamat';
-const filamesh_url = 'chim.filamesh';
+const filamesh_url = 'suzanne.filamesh';
 Filament.init([ filamat_url, filamesh_url, sky_small_url, ibl_url ], () => {
     window.app = new App(document.getElementsByTagName('canvas')[0]);
 });
 
 class App {
-    constructor(canvas) {
+    constructor(canvas) 
+        {
         this.canvas = canvas;
         this.engine = Filament.Engine.create(canvas);
         this.scene = this.engine.createScene();
@@ -31,42 +32,38 @@ class App {
 
         // TODO: create sky box and IBL
         this.skybox = this.engine.createSkyFromKtx(sky_small_url);
-    this.scene.setSkybox(this.skybox);
-    this.indirectLight = this.engine.createIblFromKtx(ibl_url);
-    this.indirectLight.setIntensity(100000);
-    this.scene.setIndirectLight(this.indirectLight);
-    Filament.fetch([sky_large_url, albedo_url, roughness_url, metallic_url, normal_url, ao_url], () => {
-    const albedo = this.engine.createTextureFromKtx(albedo_url, {srgb: true});
-    const roughness = this.engine.createTextureFromKtx(roughness_url);
-    const metallic = this.engine.createTextureFromKtx(metallic_url);
-    const normal = this.engine.createTextureFromKtx(normal_url);
-    const ao = this.engine.createTextureFromKtx(ao_url);
+        this.scene.setSkybox(this.skybox);
+        this.indirectLight = this.engine.createIblFromKtx(ibl_url);
+        this.indirectLight.setIntensity(100000);
+        this.scene.setIndirectLight(this.indirectLight);
+        Filament.fetch([sky_large_url, albedo_url, roughness_url, metallic_url, normal_url, ao_url], () => {
+        const albedo = this.engine.createTextureFromKtx(albedo_url, {srgb: true});
+        const roughness = this.engine.createTextureFromKtx(roughness_url);
+        const metallic = this.engine.createTextureFromKtx(metallic_url);
+        const normal = this.engine.createTextureFromKtx(normal_url);
+        const ao = this.engine.createTextureFromKtx(ao_url);
 
-    const sampler = new Filament.TextureSampler(
+        const sampler = new Filament.TextureSampler(
         Filament.MinFilter.LINEAR_MIPMAP_LINEAR,
         Filament.MagFilter.LINEAR,
         Filament.WrapMode.CLAMP_TO_EDGE);
 
-    this.matinstance.setTextureParameter('albedo', albedo, sampler);
-    this.matinstance.setTextureParameter('roughness', roughness, sampler);
-    this.matinstance.setTextureParameter('metallic', metallic, sampler);
-    this.matinstance.setTextureParameter('normal', normal, sampler);
-    this.matinstance.setTextureParameter('ao', ao, sampler);
+        this.matinstance.setTextureParameter('albedo', albedo, sampler);
+        this.matinstance.setTextureParameter('roughness', roughness, sampler);
+        this.matinstance.setTextureParameter('metallic', metallic, sampler);
+        this.matinstance.setTextureParameter('normal', normal, sampler);
+        this.matinstance.setTextureParameter('ao', ao, sampler);
 
     // Replace low-res skybox with high-res skybox.
-    this.engine.destroySkybox(this.skybox);
-    this.skybox = this.engine.createSkyFromKtx(sky_large_url);
-    this.scene.setSkybox(this.skybox);
+        this.engine.destroySkybox(this.skybox);
+        this.skybox = this.engine.createSkyFromKtx(sky_large_url);
+        this.scene.setSkybox(this.skybox);
 
-    this.scene.addEntity(this.suzanne);
-});
+        this.scene.addEntity(this.suzanne);
+        });
 
         // TODO: initialize gltumble
-        this.trackball = new Trackball(canvas, {startSpin: 0});
-        const tcm = this.engine.getTransformManager();
-        const inst = tcm.getInstance(this.suzanne);
-        tcm.setTransform(inst, this.trackball.getMatrix());
-        inst.delete();
+        this.trackball = new Trackball(canvas, {startSpin: -0.035});
         // TODO: fetch larger assets
 
         this.swapChain = this.engine.createSwapChain();
@@ -79,7 +76,7 @@ class App {
         this.resize = this.resize.bind(this);
         window.addEventListener('resize', this.resize);
 
-        const eye = [0, 0, 5], center = [0, 0, 0], up = [0, 10, 0];
+        const eye = [0, 0, 4], center = [0, 0, 0], up = [0, 1, 0];
         this.camera.lookAt(eye, center, up);
 
         this.resize();
@@ -88,18 +85,11 @@ class App {
 
     render() {
         // TODO: apply gltumble matrix
-        //const eye = [2, 2, -1], center = [0, 1, 0], up = [0, 5, 0];
-        const radians = - Date.now() / 1000;
-        this.trackball = new Trackball(this.canvas);
-        const transform = mat4.fromRotation(mat4.create(), radians, [0, 1, 0]);
         const tcm = this.engine.getTransformManager();
         const inst = tcm.getInstance(this.suzanne);
-        tcm.setTransform(inst, transform);
-       // inst.delete();
-    // vec3.rotateY(eye, eye, center, 0);
-    // this.camera.lookAt(eye, center, up);
+        tcm.setTransform(inst, this.trackball.getMatrix());
+        inst.delete();
         this.renderer.render(this.swapChain, this.view);
-        
         window.requestAnimationFrame(this.render);
     }
 
