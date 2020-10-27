@@ -112,13 +112,13 @@ class App {
 
     // Add animation cho vat the, o day bao gom: quay, chuyen dong tinh. tien', scale.
     render() {
-        
+        const eye = [0, 0, 8], center = [0, 0, 0], up = [0, 1, 0];
         // Lay thoi gian, lam cho vat the chuyen dong lien tuc theo thoi gian
         const radians =  Date.now() / 500;
         this.trackball = new Trackball(this.canvas);
         // Tao vecto v de vat the chuyen dong theo duong cheo
         const a = (radians%4)<2?radians%4:-4+radians%4;
-        const v = ((2+radians)%8)<4?[a,a,0]:[-a,a,0];
+        const v = ((2+radians)%8)<4?[0,a,0]:[0,-a,0];
 
 
         //Uncomment 1 trong 3 doan code duoi day de chay
@@ -128,7 +128,7 @@ class App {
 
 
         // Scale vat the
-        //const transform = mat4.fromScaling(mat4.create(), [0,2,a]);
+        //const transform = mat4.fromScaling(mat4.create(), v);
 
         // Di chuyen tinh. tien' vat the
         const transform = mat4.fromTranslation(mat4.create(), v);
@@ -137,6 +137,13 @@ class App {
         const tcm = this.engine.getTransformManager();
         const inst = tcm.getInstance(this.suzanne);
         tcm.setTransform(inst, transform);
+
+
+        // Quay camera
+        const radianss = Date.now() / 1000;
+        vec3.rotateY(eye, eye, center, radianss);
+        this.camera.lookAt(eye, center, up);
+
         this.renderer.render(this.swapChain, this.view);
         window.requestAnimationFrame(this.render);
     }
