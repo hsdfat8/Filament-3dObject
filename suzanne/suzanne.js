@@ -3,16 +3,16 @@ const albedo_suffix = Filament.getSupportedFormatSuffix('astc s3tc');
 const texture_suffix = Filament.getSupportedFormatSuffix('etc');
 
 const environ = 'venetian_crossroads_2k'
-const ibl_url = `${environ}/${environ}_ibl.ktx`;
-const sky_small_url = `${environ}/${environ}_skybox_tiny.ktx`;
-const sky_large_url = `${environ}/${environ}_skybox.ktx`;
-const albedo_url = `albedo${albedo_suffix}.ktx`;
+const ibl_url = `${environ}/${environ}_ibl2.ktx`;
+const sky_small_url = `${environ}/${environ}_skybox_tiny2.ktx`;
+const sky_large_url = `${environ}/${environ}_skybox2.ktx`;
+const albedo_url = `chim${albedo_suffix}.ktx`;
 const ao_url = `ao${texture_suffix}.ktx`;
 const metallic_url = `metallic${texture_suffix}.ktx`;
 const normal_url = `normal${texture_suffix}.ktx`;
 const roughness_url = `roughness${texture_suffix}.ktx`;
 const filamat_url = 'textured.filamat';
-const filamesh_url = 'suzanne.filamesh';
+const filamesh_url = 'chim.filamesh';
 Filament.init([ filamat_url, filamesh_url, sky_small_url, ibl_url ], () => {
     window.app = new App(document.getElementsByTagName('canvas')[0]);
 });
@@ -36,7 +36,7 @@ class App {
         this.indirectLight = this.engine.createIblFromKtx(ibl_url);
         this.indirectLight.setIntensity(100000);
         this.scene.setIndirectLight(this.indirectLight);
-        Filament.fetch([sky_large_url, albedo_url, roughness_url, metallic_url, normal_url, ao_url], () => {
+        Filament.fetch([sky_small_url, albedo_url, roughness_url, metallic_url, normal_url, ao_url], () => {
         const albedo = this.engine.createTextureFromKtx(albedo_url, {srgb: true});
         const roughness = this.engine.createTextureFromKtx(roughness_url);
         const metallic = this.engine.createTextureFromKtx(metallic_url);
@@ -54,9 +54,9 @@ class App {
         this.matinstance.setTextureParameter('normal', normal, sampler);
         this.matinstance.setTextureParameter('ao', ao, sampler);
 
-    // Replace low-res skybox with high-res skybox.
+        // Replace low-res skybox with high-res skybox.
         this.engine.destroySkybox(this.skybox);
-        this.skybox = this.engine.createSkyFromKtx(sky_large_url);
+        this.skybox = this.engine.createSkyFromKtx(sky_small_url);
         this.scene.setSkybox(this.skybox);
 
         this.scene.addEntity(this.suzanne);
